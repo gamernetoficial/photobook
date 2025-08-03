@@ -1,12 +1,13 @@
 const video = document.getElementById('video');
-const canvas = document.getElementById('previewCanvas');
-const ctx = canvas.getContext('2d');
+const previewCanvas = document.getElementById('previewCanvas');
+const previewCtx = previewCanvas.getContext('2d');
 const qrDiv = document.getElementById('qr');
 const frameGallery = document.getElementById('frameGallery');
 
-const framesSrc = ['frames/marco1.png', 'frames/marco2.png', 'frames/marco3.png'];
+const framesSrc = Array.from({ length: 20 }, (_, i) => `marco${i + 1}.png`);
 const frames = [];
 let currentFrameIndex = 0;
+let animationId = null;
 let capturaRealizada = false;
 
 framesSrc.forEach((src, index) => {
@@ -39,58 +40,66 @@ navigator.mediaDevices.getUserMedia({ video: true })
     };
   })
   .catch(err => {
-    alert('🚫 No se pudo acceder a la cámara.');
-    console.error(err);
+    console.error('Error al acceder a la cámara:', err);
+    alert('No se pudo acceder a la cámara.');
   });
 
 function renderPreview() {
   if (capturaRealizada) return;
   const frame = frames[currentFrameIndex];
-  if (frame.complete) {
-    canvas.width = frame.width;
-    canvas.height = frame.height;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+  if (frame.complete && frame.width && frame.height) {
+    previewCanvas.width = frame.width;
+    previewCanvas.height = frame.height;
+    previewCtx.drawImage(video, 0, 0, previewCanvas.width, previewCanvas.height);
+    previewCtx.drawImage(frame, 0, 0, previewCanvas.width, previewCanvas.height);
   }
-  requestAnimationFrame(renderPreview);
+  animationId = requestAnimationFrame(renderPreview);
 }
 
 document.getElementById('capturar').addEventListener('click', () => {
   capturaRealizada = true;
+  if (animationId) cancelAnimationFrame(animationId);
   const frame = frames[currentFrameIndex];
-  canvas.width = frame.width;
-  canvas.height = frame.height;
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+  previewCanvas.width = frame.width;
+  previewCanvas.height = frame.height;
+  previewCtx.drawImage(video, 0, 0, previewCanvas.width, previewCanvas.height);
+  previewCtx.drawImage(frame, 0, 0, previewCanvas.width, previewCanvas.height);
+});
+
+document.getElementById('reiniciar').addEventListener('click', () => {
+  capturaRealizada = false;
+  qrDiv.innerHTML = '';
+  previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+  renderPreview();
 });
 
 document.getElementById('descargar').addEventListener('click', () => {
+  const dataURL = previewCanvas.toDataURL('image/png');
   const link = document.createElement('a');
-  link.href = canvas.toDataURL('image/png');
-  link.download = 'captura.png';
+  link.href = dataURL;
+  link.download = 'foto_con_marco.png';
   link.click();
 });
 
-document.getElementById('subir').addEventListener('click', () => {
-  qrDiv.innerHTML = 'Subiendo...';
-  canvas.toBlob(async (blob) => {
+document.getElementById('subir').addEventListener('click', async () => {
+  qrDiv.innerHTML = 'Subiendo imagen...';
+  previewCanvas.toBlob(async (blob) => {
     const formData = new FormData();
-    formData.append('file', blob, 'captura.png');
-
+    formData.append('file', blob, 'foto.png');
     try {
-      const res = await fetch('https://file.io', { method: 'POST', body: formData });
-      const result = await res.json();
+      const response = await fetch('https://file.io', {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
       if (result.success) {
         const url = result.link;
-        qrDiv.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+        qrDiv.innerHTML = `<p>✅ Imagen subida: <a href="${url}" target="_blank">${url}</a></p>`;
         QRCode.toCanvas(document.createElement('canvas'), url, (err, qrCanvas) => {
           if (!err) qrDiv.appendChild(qrCanvas);
         });
       } else {
-        qrDiv.innerHTML = '❌ Error al subir.';
+        qrDiv.innerHTML = '❌ Error al subir la imagen.';
       }
-    } catch (e) {
-      qrDiv.innerHTML = '❌ Error de conexión.';
-    }
-  }, 'image/png');
-});
+    } catch (err) {
+      console.error('Error al subir:', err);
