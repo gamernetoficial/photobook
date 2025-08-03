@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Selector de Cámara (Localhost)</title>
+  <style>
+    body { background: #111; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+    video { width: 90vw; max-width: 600px; border: 2px solid #0ff; border-radius: 10px; margin-bottom: 10px; }
+    select, button { padding: 10px; margin: 5px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h2>Selecciona una cámara</h2>
+  <select id="cameraSelect"></select>
+  <button onclick="startSelectedCamera()">Iniciar Cámara</button>
+  <video id="video" autoplay playsinline></video>
+
+  <script>
+    let devices = [];
+
+    async function listCameras() {
+      try {
+        const allDevices = await navigator.mediaDevices.enumerateDevices();
+        devices = allDevices.filter(d => d.kind === 'videoinput');
+        const select = document.getElementById('cameraSelect');
+        select.innerHTML = '';
+        devices.forEach((device, index) => {
+          const option = document.createElement('option');
+          option.value = device.deviceId;
+          option.text = device.label || `Cámara ${index + 1}`;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        console.error("Error al listar cámaras:", err);
+        alert("No se pudo acceder a los dispositivos. ¿Estás en localhost?");
+      }
+    }
+
+    async function startSelectedCamera() {
+      const deviceId = document.getElementById('cameraSelect').value;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: { exact: deviceId } },
+          audio: false
+        });
+        const video = document.getElementById('video');
+        video.srcObject = stream;
+      } catch (err) {
+        console.error("Error al iniciar cámara:", err);
+        alert("No se pudo iniciar la cámara seleccionada.");
+      }
+    }
+
+    window.onload = listCameras;
+  </script>
+</body>
+</html>
