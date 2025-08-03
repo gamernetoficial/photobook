@@ -71,31 +71,37 @@ document.getElementById('descargar').addEventListener('click', () => {
   link.download = 'captura.png';
   link.click();
 });
-
-// ☁️ Subir y generar QR
+// ☁️ Subir a imgbb y generar QR
 document.getElementById('subir').addEventListener('click', () => {
   qrDiv.innerHTML = 'Subiendo...';
-  canvas.toBlob(async blob => {
-    const formData = new FormData();
-    formData.append('file', blob, 'captura.png');
-    try {
-      const res = await fetch('https://file.io', { method: 'POST', body: formData });
-      const data = await res.json();
+  const base64 = canvas.toDataURL('image/png').replace(/^data:image\/\w+;base64,/, '');
+  const formData = new FormData();
+  formData.append('image', base64);
+
+  const apiKey = '8c07173f4bb6c9061dccd4eccd84809b'; // ← Reemplaza con tu API key de imgbb
+
+  fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+    method: 'POST',
+    body: formData
+  })
+    .then(res => res.json())
+    .then(data => {
       if (data.success) {
-        const url = data.link;
+        const url = data.data.url;
         qrDiv.innerHTML = `<p><a href="${url}" target="_blank">${url}</a></p>`;
         QRCode.toCanvas(document.createElement('canvas'), url, (err, qrCanvas) => {
           if (!err) qrDiv.appendChild(qrCanvas);
         });
       } else {
         qrDiv.textContent = 'Error al subir.';
+        console.error(data);
       }
-    } catch (err) {
+    })
+    .catch(err => {
       qrDiv.textContent = 'Error de conexión.';
-    }
-  }, 'image/png');
+      console.error(err);
+    });
 });
-
 // 🖼️ Galería de marcos
 framesSrc.forEach((src, index) => {
   const thumb = document.createElement('img');
