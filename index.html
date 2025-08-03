@@ -2,63 +2,28 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>📸 Captura con Marco + QR</title>
+  <title>📸 Captura Estática con Marco + QR</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>📸 Captura con Marco + QR</h1>
+  <h1>📸 Captura Estática con Marco + QR</h1>
   <div class="container">
-    <canvas id="previewCanvas"></canvas>
+    <div class="preview">
+      <canvas id="previewCanvas"></canvas>
+    </div>
     <div class="controls">
       <button id="capturar">📷 Capturar</button>
+      <button id="reiniciar">🔄 Reiniciar</button>
       <button id="descargar">⬇️ Descargar</button>
-      <button id="subir">☁️ Subir</button>
+      <button id="subir">☁️ Subir a file.io</button>
+      <div class="frame-gallery" id="frameGallery"></div>
       <div id="qr"></div>
-      <div id="frameGallery"></div>
     </div>
   </div>
 
   <video id="video" autoplay playsinline></video>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <script>
-    async function activarVersionLite() {
-      const ua = navigator.userAgent;
-      const isAndroid9 = ua.includes("Android 9");
-      const lacksCamera = !navigator.mediaDevices?.getUserMedia;
-      const lacksBlob = !HTMLCanvasElement.prototype.toBlob;
-
-      let isIncognito = false;
-      let cameraDenied = false;
-
-      try {
-        const { quota } = await navigator.storage.estimate();
-        if (quota && quota < 120 * 1024 * 1024) isIncognito = true;
-      } catch {}
-
-      try {
-        const status = await navigator.permissions.query({ name: 'camera' });
-        if (status.state === 'denied') cameraDenied = true;
-      } catch {}
-
-      const usarLite = isAndroid9 || lacksCamera || lacksBlob || isIncognito || cameraDenied;
-
-      if (usarLite) {
-        document.write('<script src="script-lite.js"><\/script>');
-        document.write(`
-          <div style="background:#222;padding:10px;color:#ff0;text-align:center;">
-            ⚠️ Estás usando la versión Lite por compatibilidad.
-            ${isAndroid9 ? "<br>📱 Android 9 detectado." : ""}
-            ${isIncognito ? "<br>🔒 Modo incógnito activo." : ""}
-            ${cameraDenied ? "<br>🚫 Permisos de cámara bloqueados." : ""}
-          </div>
-        `);
-      } else {
-        document.write('<script src="script.js"><\/script>');
-      }
-    }
-
-    activarVersionLite();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
