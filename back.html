@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cámara Trasera Automática</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    video {
+      width: 90vw;
+      max-width: 600px;
+      border: 2px solid #0ff;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <video id="video" autoplay playsinline></video>
+
+  <script>
+    async function getBackCameraId() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(d => d.kind === 'videoinput');
+
+      // Buscar por nombre que contenga "back" o "rear"
+      const backCam = videoDevices.find(d =>
+        /back|rear/i.test(d.label)
+      );
+
+      // Si no se encuentra, usar la última cámara como fallback
+      return backCam ? backCam.deviceId : videoDevices[videoDevices.length - 1]?.deviceId;
+    }
+
+    async function startBackCamera() {
+      try {
+        const deviceId = await getBackCameraId();
+        if (!deviceId) throw new Error("No se encontró cámara trasera.");
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: { exact: deviceId } },
+          audio: false
+        });
+
+        const video = document.getElementById('video');
+        video.srcObject = stream;
+      } catch (err) {
+        console.error("Error al iniciar cámara trasera:", err);
+        alert("No se pudo iniciar la cámara trasera.");
+      }
+    }
+
+    window.onload = startBackCamera;
+  </script>
+</body>
+</html>
