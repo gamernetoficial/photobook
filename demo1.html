@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Vista de Cámara Frontal</title>
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    video {
+      width: 90vw;
+      max-width: 600px;
+      border: 2px solid #0ff;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #0ff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <video id="video" autoplay playsinline></video>
+  <button onclick="startCamera()">Reiniciar Cámara</button>
+
+  <script>
+    async function startCamera() {
+      try {
+        const constraints = {
+          video: {
+            facingMode: "user" // Más flexible que exact
+          },
+          audio: false
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        const videoElement = document.getElementById('video');
+        videoElement.srcObject = stream;
+      } catch (err) {
+        console.error("Error al acceder a la cámara:", err);
+        alert("No se pudo acceder a la cámara. Verifica permisos y conexión HTTPS.");
+      }
+    }
+
+    // Iniciar automáticamente al cargar
+    window.onload = startCamera;
+  </script>
+</body>
+</html>
