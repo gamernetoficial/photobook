@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>📸 Ejemplo 3: Cámara Configurable + Marcos + QR</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>📸 Cámara Configurable + Marcos + QR</h1>
+  <div class="controls">
+    <label for="deviceSelect">🎥 Selecciona cámara:</label>
+    <select id="deviceSelect"></select>
+    <button id="startCamera">🔧 Iniciar Cámara</button>
+  </div>
+  <div class="container">
+    <div class="preview">
+      <canvas id="previewCanvas"></canvas>
+    </div>
+    <div class="actions">
+      <button id="capturar">📷 Capturar</button>
+      <button id="descargar">⬇️ Descargar</button>
+      <button id="subir">☁️ Subir a file.io</button>
+      <div id="qr"></div>
+      <div class="frame-gallery" id="frameGallery"></div>
+    </div>
+  </div>
+  <video id="video" autoplay playsinline></video>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
