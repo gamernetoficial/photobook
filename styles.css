@@ -58,3 +58,8 @@ select, button {
   border-color: #00ff88;
   box-shadow: 0 0 10px #00ff88;
 }
+button {
+	font-size: 1.2rem;
+	padding: 14px 28px;
+	margin: 10px;
+	border: 3px solid #00ffff; /* borde llamativo

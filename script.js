@@ -1,7 +1,6 @@
 const video = document.getElementById('video');
 const canvas = document.getElementById('previewCanvas');
 const ctx = canvas.getContext('2d');
-const deviceSelect = document.getElementById('deviceSelect');
 const qrDiv = document.getElementById('qr');
 const frameGallery = document.getElementById('frameGallery');
 
@@ -17,35 +16,35 @@ const frames = framesSrc.map(src => {
   return img;
 });
 
-// 🎥 Listar dispositivos
-navigator.mediaDevices.enumerateDevices().then(devices => {
+// 🎥 Obtener cámara trasera
+async function getBackCameraId() {
+  const devices = await navigator.mediaDevices.enumerateDevices();
   const videoDevices = devices.filter(d => d.kind === 'videoinput');
-  videoDevices.forEach(device => {
-    const option = document.createElement('option');
-    option.value = device.deviceId;
-    option.text = device.label || `Cámara ${device.deviceId}`;
-    deviceSelect.appendChild(option);
-  });
-});
+  const backCam = videoDevices.find(d => /back|rear/i.test(d.label));
+  return backCam ? backCam.deviceId : videoDevices[videoDevices.length - 1]?.deviceId;
+}
 
-// 🔧 Iniciar cámara
-document.getElementById('startCamera').addEventListener('click', () => {
-  const deviceId = deviceSelect.value;
+// 🔧 Iniciar cámara trasera automáticamente
+async function startBackCamera() {
+  const deviceId = await getBackCameraId();
+  if (!deviceId) return alert('No se encontró cámara trasera');
+
   if (currentStream) {
     currentStream.getTracks().forEach(track => track.stop());
   }
 
-  navigator.mediaDevices.getUserMedia({
-    video: { deviceId: { exact: deviceId }, width: 640, height: 960 }
-  }).then(stream => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { deviceId: { exact: deviceId }, width: 640, height: 960 }
+    });
     currentStream = stream;
     video.srcObject = stream;
     video.play();
     renderPreview();
-  }).catch(err => {
+  } catch (err) {
     alert('Error al iniciar cámara: ' + err.message);
-  });
-});
+  }
+}
 
 // 🖼️ Renderizar preview
 function renderPreview() {
@@ -64,13 +63,6 @@ document.getElementById('capturar').addEventListener('click', () => {
   renderPreview();
 });
 
-// ⬇️ Descargar
-document.getElementById('descargar').addEventListener('click', () => {
-  const link = document.createElement('a');
-  link.href = canvas.toDataURL('image/png');
-  link.download = 'captura.png';
-  link.click();
-});
 // ☁️ Subir a imgbb y generar QR
 document.getElementById('subir').addEventListener('click', () => {
   qrDiv.innerHTML = 'Subiendo...';
@@ -78,7 +70,7 @@ document.getElementById('subir').addEventListener('click', () => {
   const formData = new FormData();
   formData.append('image', base64);
 
-  const apiKey = '8c07173f4bb6c9061dccd4eccd84809b'; // ← Reemplaza con tu API key de imgbb
+  const apiKey = 'TU_API_KEY_AQUÍ'; // ← Reemplaza con tu API key de imgbb
 
   fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
     method: 'POST',
@@ -102,6 +94,7 @@ document.getElementById('subir').addEventListener('click', () => {
       console.error(err);
     });
 });
+
 // 🖼️ Galería de marcos
 framesSrc.forEach((src, index) => {
   const thumb = document.createElement('img');
@@ -116,3 +109,6 @@ framesSrc.forEach((src, index) => {
   if (index === 0) thumb.classList.add('selected-frame');
   frameGallery.appendChild(thumb);
 });
+
+// 🚀 Iniciar cámara trasera al cargar
+window.onload = startBackCamera;
