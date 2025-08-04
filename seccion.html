@@ -14,7 +14,8 @@
       font-family: 'Segoe UI', sans-serif;
       color: #fff;
       overflow: hidden;
-      touch-action: pan-x;
+      display: flex;
+      flex-direction: column;
     }
 
     h1 {
@@ -22,6 +23,7 @@
       padding: 10px;
       font-size: 2rem;
       text-shadow: 0 0 10px #00f0ff;
+      flex-shrink: 0;
     }
 
     .frame-container {
@@ -29,23 +31,23 @@
       flex-direction: row-reverse;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      height: calc(100vh - 100px);
       padding: 20px;
-      gap: 30px;
+      gap: 20px;
       align-items: center;
+      flex-grow: 1;
     }
 
     .frame-item {
       flex: 0 0 auto;
-      height: 90vh;
+      height: 75vh;
       aspect-ratio: 2 / 3;
       scroll-snap-align: center;
-      border: 4px solid #00f0ff;
-      border-radius: 12px;
+      border: 3px solid #00f0ff;
+      border-radius: 10px;
       overflow: hidden;
       cursor: pointer;
       transition: transform 0.3s ease, border-color 0.3s ease;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
     }
 
     .frame-item img {
@@ -60,18 +62,19 @@
 
     .selected {
       border-color: #00ff88;
-      box-shadow: 0 0 25px #00ff88;
+      box-shadow: 0 0 20px #00ff88;
     }
 
     .button-container {
       text-align: center;
       padding: 10px;
+      flex-shrink: 0;
     }
 
     button {
-      padding: 14px 28px;
-      font-size: 1.2rem;
-      border-radius: 10px;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      border-radius: 8px;
       border: 2px solid #00ffff;
       background: #111;
       color: #fff;
@@ -85,16 +88,31 @@
     }
 
     ::-webkit-scrollbar {
-      height: 12px;
+      height: 10px;
     }
 
     ::-webkit-scrollbar-thumb {
       background: #00f0ff;
-      border-radius: 6px;
+      border-radius: 5px;
     }
 
     ::-webkit-scrollbar-track {
       background: #222;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .frame-item {
+        height: 65vh;
+      }
+
+      button {
+        font-size: 1rem;
+        padding: 10px 20px;
+      }
     }
   </style>
 </head>
