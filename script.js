@@ -52,8 +52,21 @@ function renderPreview() {
   const frame = frames[currentFrameIndex];
   canvas.width = 640;
   canvas.height = 960;
+
+  // Invertir horizontalmente
+  ctx.save();
+  ctx.translate(canvas.width, 0);
+  ctx.scale(-1, 1);
+
+  // Dibujar video reflejado
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // Restaurar contexto para dibujar el marco normalmente
+  ctx.restore();
+
+  // Dibujar marco sin invertir
   ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+
   requestAnimationFrame(renderPreview);
 }
 
