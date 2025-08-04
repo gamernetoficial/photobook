@@ -3,22 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <title>📸 Cámara con Marco</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      padding: 10px;
+      font-size: 2rem;
+      text-shadow: 0 0 10px #00f0ff;
+      flex-shrink: 0;
+    }
+
+    .preview {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+
+    canvas {
+      width: auto;
+      height: 75vh;
+      max-width: 90vw;
+      border-radius: 12px;
+      border: 3px solid #00f0ff;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+      background: #000;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 15px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: 2px solid #00ffff;
+      background: #111;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #00ffff;
+      color: #000;
+    }
+
+    #qr {
+      text-align: center;
+      margin-top: 10px;
+      color: #00ff88;
+    }
+
+    video {
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      canvas {
+        height: 65vh;
+      }
+
+      button {
+        font-size: 1rem;
+        padding: 10px 20px;
+      }
+    }
+  </style>
 </head>
 <body>
   <h1>📸 Cámara con Marco</h1>
-  <div class="container">
-    <div class="preview">
-      <canvas id="previewCanvas"></canvas>
-    </div>
-    <div class="actions">
-      <button id="capturar">📷 Capturar</button>
-      <button id="subir">☁️ Bajar Imagen</button>
-      <div id="qr"></div>
-    </div>
+  <div class="preview">
+    <canvas id="previewCanvas"></canvas>
   </div>
+  <div class="actions">
+    <button id="capturar">📷 Capturar</button>
+    <button id="subir">☁️ Bajar Imagen</button>
+  </div>
+  <div id="qr"></div>
+  <video id="video" autoplay playsinline></video>
 
-  <video type="hidden" id="video" autoplay playsinline></video>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script>
     const video = document.getElementById('video');
@@ -84,7 +172,7 @@
     });
 
     document.getElementById('subir').addEventListener('click', () => {
-      qrDiv.innerHTML = 'Espere un Momento...';
+      qrDiv.innerHTML = 'Espere un momento...';
       const base64 = canvas.toDataURL('image/png').replace(/^data:image\/\w+;base64,/, '');
       const formData = new FormData();
       formData.append('image', base64);
@@ -109,6 +197,15 @@
           qrDiv.textContent = 'Error de conexión.';
           console.error(err);
         });
+    });
+
+    // Activar pantalla completa al tocar
+    document.body.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.warn('No se pudo activar pantalla completa:', err);
+        });
+      }
     });
 
     window.onload = startBackCamera;
