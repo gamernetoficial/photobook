@@ -65,12 +65,12 @@ document.getElementById('capturar').addEventListener('click', () => {
 
 // ☁️ Subir a imgbb y generar QR
 document.getElementById('subir').addEventListener('click', () => {
-  qrDiv.innerHTML = 'Subiendo...';
+  qrDiv.innerHTML = 'Espere un Momento...';
   const base64 = canvas.toDataURL('image/png').replace(/^data:image\/\w+;base64,/, '');
   const formData = new FormData();
   formData.append('image', base64);
 
-  const apiKey = 'TU_API_KEY_AQUÍ'; // ← Reemplaza con tu API key de imgbb
+  const apiKey = '8c07173f4bb6c9061dccd4eccd84809b'; // ← Reemplaza con tu API key de imgbb
 
   fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
     method: 'POST',
