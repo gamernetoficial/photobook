@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>🎉 Tu Código QR</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Press Start 2P', cursive;
+      background: radial-gradient(circle at center, #1a1a2e, #0f0c29);
+      overflow: hidden;
+      color: #fff;
+      text-align: center;
+    }
+
+    /* Fondo animado estilo arcade */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('https://www.transparenttextures.com/patterns/stardust.png');
+      animation: sparkle 10s linear infinite;
+      opacity: 0.2;
+      z-index: -1;
+    }
+
+    @keyframes sparkle {
+      0% { background-position: 0 0; }
+      100% { background-position: 1000px 1000px; }
+    }
+
+    header {
+      background: linear-gradient(90deg, #ff00cc, #3333ff);
+      padding: 20px;
+      box-shadow: 0 0 20px #ff00cc;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #fff;
+      text-shadow: 0 0 10px #00ffff;
+    }
+
+    #qrContainer {
+      margin: 40px auto;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 16px;
+      box-shadow: 0 0 30px #00f0ff;
+      max-width: 90vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #qrContainer p {
+      color: #00ffff;
+      font-size: 0.8rem;
+      margin-bottom: 20px;
+      word-break: break-word;
+      text-align: center;
+      background: #111;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #00ffff;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+      border: 4px solid #00ff88;
+      box-shadow: 0 0 20px #00ff88;
+      border-radius: 12px;
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 14px 28px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 3px solid #ff00cc;
+      background: #222;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff00cc;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: #ff00cc;
+      color: #000;
+      box-shadow: 0 0 20px #ff00cc;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎉 ¡Tu Foto Está Lista!</h1>
+  </header>
+
+  <div id="qrContainer"></div>
+  <button onclick="window.location.href='prueba.html'">🔙 Tomar otra foto</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const imageUrl = params.get('url');
+    const qrContainer = document.getElementById('qrContainer');
+
+    if (imageUrl) {
+      const linkText = document.createElement('p');
+      linkText.textContent = imageUrl;
+      qrContainer.appendChild(linkText);
+
+      QRCode.toCanvas(imageUrl, { width: 256 }, (err, canvas) => {
+        if (!err) qrContainer.appendChild(canvas);
+      });
+    } else {
+      qrContainer.textContent = 'No se encontró la URL de la imagen.';
+    }
+  </script>
+</body>
+</html>

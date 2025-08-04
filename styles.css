@@ -71,27 +71,3 @@ button {
   width: 0;
   height: 0;
 }
-.qr-section {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-}
-
-.qr-section canvas {
-  width: 300px;
-  height: 300px;
-  margin: 20px 0;
-}
-
-#volver {
-  padding: 12px 24px;
-  font-size: 1.2rem;
-  background-color: #00ff88;
-  color: #000;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0 0 10px #00ff88;
-}
