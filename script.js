@@ -79,11 +79,12 @@ document.getElementById('capturar').addEventListener('click', () => {
 // ☁️ Subir a imgbb y generar QR
 document.getElementById('subir').addEventListener('click', () => {
   qrDiv.innerHTML = 'Espere un Momento...';
+
   const base64 = canvas.toDataURL('image/png').replace(/^data:image\/\w+;base64,/, '');
   const formData = new FormData();
   formData.append('image', base64);
 
-  const apiKey = '8c07173f4bb6c9061dccd4eccd84809b'; // ← Reemplaza con tu API key de imgbb
+  const apiKey = '8c07173f4bb6c9061dccd4eccd84809b';
 
   fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
     method: 'POST',
@@ -93,9 +94,30 @@ document.getElementById('subir').addEventListener('click', () => {
     .then(data => {
       if (data.success) {
         const url = data.data.url;
-        qrDiv.innerHTML = `<p><a href="${url}" target="_blank">${url}</a></p>`;
+        qrDiv.innerHTML = `
+          <p><a href="${url}" target="_blank">${url}</a></p>
+        `;
+
         QRCode.toCanvas(document.createElement('canvas'), url, (err, qrCanvas) => {
-          if (!err) qrDiv.appendChild(qrCanvas);
+          if (!err) {
+            qrDiv.appendChild(qrCanvas);
+
+            // Crear botón "Volver"
+            const volverBtn = document.createElement('button');
+            volverBtn.id = 'volver';
+            volverBtn.textContent = '🔄 Volver';
+            volverBtn.addEventListener('click', () => {
+              qrDiv.style.display = 'none';
+              document.querySelector('.container').style.display = 'flex';
+              capturaRealizada = false;
+              renderPreview();
+            });
+            qrDiv.appendChild(volverBtn);
+
+            // Mostrar solo QR
+            document.querySelector('.container').style.display = 'none';
+            qrDiv.style.display = 'flex';
+          }
         });
       } else {
         qrDiv.textContent = 'Error al subir.';
@@ -107,7 +129,6 @@ document.getElementById('subir').addEventListener('click', () => {
       console.error(err);
     });
 });
-
 // 🖼️ Galería de marcos
 framesSrc.forEach((src, index) => {
   const thumb = document.createElement('img');
