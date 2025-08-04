@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>📸 Cámara con Marco</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>📸 Cámara con Marco</h1>
+  <div class="container">
+    <div class="preview">
+      <canvas id="previewCanvas"></canvas>
+    </div>
+    <div class="actions">
+      <button id="capturar">📷 Capturar</button>
+      <button id="subir">☁️ Bajar Imagen</button>
+      <div id="qr"></div>
+    </div>
+  </div>
+
+  <video type="hidden" id="video" autoplay playsinline></video>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const qrDiv = document.getElementById('qr');
+
+    let currentStream = null;
+    let capturaRealizada = false;
+
+    const params = new URLSearchParams(window.location.search);
+    const frameIndex = parseInt(params.get('frame')) || 0;
+    const frame = new Image();
+    frame.crossOrigin = "anonymous";
+    frame.src = `marco${frameIndex + 1}.png`;
+
+    async function getBackCameraId() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(d => d.kind === 'videoinput');
+      const backCam = videoDevices.find(d => /back|rear/i.test(d.label));
+      return backCam ? backCam.deviceId : videoDevices[videoDevices.length - 1]?.deviceId;
+    }
+
+    async function startBackCamera() {
+      const deviceId = await getBackCameraId();
+      if (!deviceId) return alert('No se encontró cámara trasera');
+
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: { exact: deviceId }, width: 640, height: 960 }
+        });
+        currentStream = stream;
+        video.srcObject = stream;
+        video.play();
+        renderPreview();
+      } catch (err) {
+        alert('Error al iniciar cámara: ' + err.message);
+      }
+    }
+
+    function renderPreview() {
+      if (capturaRealizada) return;
+      canvas.width = 640;
+      canvas.height = 960;
+
+      ctx.save();
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+
+      ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+      requestAnimationFrame(renderPreview);
+    }
+
+    document.getElementById('capturar').addEventListener('click', () => {
+      capturaRealizada = true;
+      renderPreview();
+    });
+
+    document.getElementById('subir').addEventListener('click', () => {
+      qrDiv.innerHTML = 'Espere un Momento...';
+      const base64 = canvas.toDataURL('image/png').replace(/^data:image\/\w+;base64,/, '');
+      const formData = new FormData();
+      formData.append('image', base64);
+
+      const apiKey = '8c07173f4bb6c9061dccd4eccd84809b';
+
+      fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            const url = data.data.url;
+            window.location.href = `qr.html?url=${encodeURIComponent(url)}`;
+          } else {
+            qrDiv.textContent = 'Error al subir.';
+            console.error(data);
+          }
+        })
+        .catch(err => {
+          qrDiv.textContent = 'Error de conexión.';
+          console.error(err);
+        });
+    });
+
+    window.onload = startBackCamera;
+  </script>
+</body>
+</html>
